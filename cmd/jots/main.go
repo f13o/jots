@@ -139,7 +139,7 @@ func cmdAdd(args []string) {
 		Created: info.ModTime().Format("2006-01-02 15:04:05"),
 	})
 	saveIndex(home, index)
-	fmt.Println(absPath)
+	fmt.Println(displayPath(absPath, home))
 }
 
 func cmdMv(args []string) {
@@ -175,7 +175,7 @@ func cmdMv(args []string) {
 		}
 	}
 	saveIndex(home, index)
-	fmt.Println(dst)
+	fmt.Println(displayPath(dst, home))
 }
 
 func cmdLs(args []string) {
@@ -199,7 +199,7 @@ func cmdLs(args []string) {
 		if re != nil && !re.MatchString(e.Path) && !re.MatchString(e.Title) && !re.MatchString(e.Project) {
 			continue
 		}
-		fmt.Println(e.Path)
+		fmt.Println(displayPath(e.Path, home))
 	}
 }
 
@@ -221,7 +221,7 @@ func cmdPrune() {
 
 	fmt.Printf("stale entries (%d):\n", len(stale))
 	for _, e := range stale {
-		fmt.Printf("  %s\n", e.Path)
+		fmt.Printf("  %s\n", displayPath(e.Path, home))
 	}
 	fmt.Print("\nremove these entries? [y/N] ")
 
@@ -389,6 +389,13 @@ func editorCmd() string {
 		return e
 	}
 	return os.Getenv("VISUAL")
+}
+
+func displayPath(path, home string) string {
+	if strings.HasPrefix(path, home+"/") {
+		return "~" + path[len(home):]
+	}
+	return path
 }
 
 func fatal(format string, args ...any) {
