@@ -10,12 +10,6 @@ Jot fast, tidy up later.
 go install github.com/f13o/jots/cmd/jots@latest
 ```
 
-Alias for quick access:
-
-```
-alias jot='jots new'
-```
-
 ## Usage
 
 ```
@@ -27,16 +21,35 @@ jots new [flags] [title] [output-dir]
 - `output-dir` -- where to write the file (default: current directory)
 - `-t name` -- template to use (default: `default`)
 
-## Examples (with the alias)
+## Examples
 
 ```
-jot                        # ./default.md
-jot meeting                # ./meeting.md
-jot meeting ~/notes        # ~/notes/meeting.md
-jot -t standup retro       # ./retro.md using standup template
+jots new                        # ./no-name-jot.md
+jots new meeting                # ./meeting.md
+jots new meeting ~/notes        # ~/notes/meeting.md
+jots new -t standup retro       # ./retro.md using standup template
 ```
 
 If the file already exists, a counter is appended: `meeting-2.md`, `meeting-3.md`.
+
+## Tidy up: Jots Index
+
+Every document you crate with jot is mapped into the Jot Index (`~/.jot/index.json`) so
+you can find later and tidy up as you need:
+
+```
+jots ls             # list indexed notes
+
+jots add            # index an existing note
+jots mv             # move/rename a note
+jots prune          # remove stale entries from the index
+```
+
+Use `jots mv <src> <dst>` as normal `mv` UNIX command to keep the index aware.
+
+In case you forget to use `jots mv` and moved a file with the UNIX command, you can
+always re-add them with `jots add` and then `jots prune` to remove stales from the
+index.
 
 ## Templates
 

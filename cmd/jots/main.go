@@ -31,8 +31,6 @@ func main() {
 		cmdLs(os.Args[2:])
 	case "prune":
 		cmdPrune()
-	case "reindex":
-		cmdReindex()
 	default:
 		fatal("unknown command: %s", os.Args[1])
 	}
@@ -44,7 +42,7 @@ func cmdNew(args []string) {
 	fs.Parse(args)
 
 	posArgs := fs.Args()
-	title := *tmplName
+	title := "no-name-jot"
 	if len(posArgs) >= 1 {
 		title = posArgs[0]
 	}
@@ -240,48 +238,6 @@ func cmdPrune() {
 	}
 	saveIndex(home, clean)
 	fmt.Printf("removed %d entries, %d remaining\n", len(stale), len(clean))
-}
-
-func cmdReindex() {
-	args := os.Args[2:]
-	if len(args) < 1 {
-		fatal("usage: jots reindex <path>")
-	}
-
-	dir, err := filepath.Abs(args[0])
-	if err != nil {
-		fatal("invalid path: %v", err)
-	}
-
-	home, _ := os.UserHomeDir()
-	index := loadIndex(home)
-
-	indexed := make(map[string]bool)
-	for _, e := range index {
-		indexed[e.Path] = true
-	}
-
-	added := 0
-	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".md") {
-			return nil
-		}
-		if indexed[path] {
-			return nil
-		}
-		index = append(index, indexEntry{
-			Path:    path,
-			Project: projectFromDir(filepath.Dir(path), home),
-			Title:   strings.TrimSuffix(filepath.Base(path), ".md"),
-			Created: info.ModTime().Format("2006-01-02 15:04:05"),
-		})
-		indexed[path] = true
-		added++
-		return nil
-	})
-
-	saveIndex(home, index)
-	fmt.Printf("added %d entries, %d total\n", added, len(index))
 }
 
 type indexEntry struct {
