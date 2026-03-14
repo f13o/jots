@@ -39,16 +39,12 @@ func main() {
 func cmdNew(args []string) {
 	fs := flag.NewFlagSet("new", flag.ExitOnError)
 	tmplName := fs.String("t", "default", "")
+	outputDir := fs.String("d", ".", "")
 	fs.Parse(args)
 
-	posArgs := fs.Args()
-	title := "no-name-jot"
-	if len(posArgs) >= 1 {
-		title = posArgs[0]
-	}
-	outputDir := "."
-	if len(posArgs) >= 2 {
-		outputDir = posArgs[1]
+	title := strings.Join(fs.Args(), " ")
+	if title == "" {
+		title = *tmplName
 	}
 
 	home, err := os.UserHomeDir()
@@ -74,7 +70,7 @@ func cmdNew(args []string) {
 	result := replaceVars(string(content), vars)
 
 	slug := slugify(title)
-	outPath := resolveFilename(outputDir, slug)
+	outPath := resolveFilename(*outputDir, slug)
 	absPath, _ := filepath.Abs(outPath)
 
 	if err := os.WriteFile(outPath, []byte(result), 0644); err != nil {

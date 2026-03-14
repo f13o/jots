@@ -13,24 +13,31 @@ go install github.com/f13o/jots/cmd/jots@latest
 ## Take notes
 
 ```
-jots new [flags] [title] [output-dir]
+jots new [flags] title 
 ```
 
 - `title` -- becomes the filename and `{{title}}` in the template (default: template
   name)
-- `output-dir` -- where to write the file (default: current directory)
+- `-d path` -- where to write the file (default: current directory)
 - `-t name` -- template to use (default: `default`)
 
 ### Examples
 
 ```
-jots new                        # ./no-name-jot.md
-jots new meeting                # ./meeting.md
-jots new meeting ~/notes        # ~/notes/meeting.md
-jots new -t standup retro       # ./retro.md using standup template
+jots new                            # ./no-name-jot.md
+jots new meeting                    # ./meeting.md
+jots new file with long title       # ./file-with-long-title.md
+jots new -d ~/notes meeting         # ~/notes/meeting.md
+jots new -t standup retro           # ./retro.md using standup template
 ```
 
 If the file already exists, a counter is appended: `meeting-2.md`, `meeting-3.md`.
+
+### Jot faster with an alias
+
+```
+alias jot="jots new"
+```
 
 ## Tidy up: Jots Index
 
@@ -56,7 +63,7 @@ index.
 Templates live in `~/.jot/templates/`. A default template is created automatically on
 first run.
 
-Every new jot can leverage on the basic templating that run on jot creation.
+Every new jot can leverage on the basic templating that runs at jot creation.
 
 A template that defines the following variables will have them auto-filled wherever they
 appear in the document, both frontmatter and body:
