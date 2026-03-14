@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -15,7 +16,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: jots <command> [args]\n\ncommands:\n  new      create a note from a template\n  add      index an existing note\n  mv       move/rename a note\n  prune    remove stale entries from the index\n  reindex  re-index notes at a given path")
+		fmt.Fprintln(os.Stderr, "usage: jots <command> [args]\n\ncommands:\n  new      create a note from a template\n  add      index an existing note\n  mv       move/rename a note\n  ls       list indexed notes\n  prune    remove stale entries from the index\n  reindex  re-index notes at a given path")
 		os.Exit(1)
 	}
 
@@ -26,6 +27,8 @@ func main() {
 		cmdAdd(os.Args[2:])
 	case "mv":
 		cmdMv(os.Args[2:])
+	case "ls":
+		cmdLs(os.Args[2:])
 	case "prune":
 		cmdPrune()
 	case "reindex":
@@ -173,6 +176,31 @@ func cmdMv(args []string) {
 	}
 	saveIndex(home, index)
 	fmt.Println(dst)
+}
+
+func cmdLs(args []string) {
+	fs := flag.NewFlagSet("ls", flag.ExitOnError)
+	pattern := fs.String("re", "", "")
+	fs.Parse(args)
+
+	home, _ := os.UserHomeDir()
+	index := loadIndex(home)
+
+	var re *regexp.Regexp
+	if *pattern != "" {
+		var err error
+		re, err = regexp.Compile(*pattern)
+		if err != nil {
+			fatal("invalid regexp: %v", err)
+		}
+	}
+
+	for _, e := range index {
+		if re != nil && !re.MatchString(e.Path) && !re.MatchString(e.Title) && !re.MatchString(e.Project) {
+			continue
+		}
+		fmt.Println(e.Path)
+	}
 }
 
 func cmdPrune() {
