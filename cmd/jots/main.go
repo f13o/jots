@@ -30,7 +30,7 @@ func main() {
 	case "ls":
 		cmdLs(os.Args[2:])
 	case "prune":
-		cmdPrune()
+		cmdPrune(os.Args[2:])
 	default:
 		fatal("unknown command: %s", os.Args[1])
 	}
@@ -197,12 +197,29 @@ func cmdLs(args []string) {
 	}
 }
 
-func cmdPrune() {
+func cmdPrune(args []string) {
+	fs := flag.NewFlagSet("prune", flag.ExitOnError)
+	pattern := fs.String("re", "", "")
+	dry := fs.Bool("dry", false, "")
+	fs.Parse(args)
+
 	home, _ := os.UserHomeDir()
 	index := loadIndex(home)
 
+	var re *regexp.Regexp
+	if *pattern != "" {
+		var err error
+		re, err = regexp.Compile(*pattern)
+		if err != nil {
+			fatal("invalid regexp: %v", err)
+		}
+	}
+
 	var stale []indexEntry
 	for _, e := range index {
+		if re != nil && !re.MatchString(e.Path) && !re.MatchString(e.Title) && !re.MatchString(e.Project) {
+			continue
+		}
 		if _, err := os.Stat(e.Path); err != nil {
 			stale = append(stale, e)
 		}
@@ -217,6 +234,11 @@ func cmdPrune() {
 	for _, e := range stale {
 		fmt.Printf("  %s\n", displayPath(e.Path, home))
 	}
+
+	if *dry {
+		return
+	}
+
 	fmt.Print("\nremove these entries? [y/N] ")
 
 	scanner := bufio.NewScanner(os.Stdin)
