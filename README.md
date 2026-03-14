@@ -10,7 +10,7 @@ Jot fast, tidy up later.
 go install github.com/f13o/jots/cmd/jots@latest
 ```
 
-## Usage
+## Take notes
 
 ```
 jots new [flags] [title] [output-dir]
@@ -21,7 +21,7 @@ jots new [flags] [title] [output-dir]
 - `output-dir` -- where to write the file (default: current directory)
 - `-t name` -- template to use (default: `default`)
 
-## Examples
+### Examples
 
 ```
 jots new                        # ./no-name-jot.md
@@ -56,7 +56,10 @@ index.
 Templates live in `~/.jot/templates/`. A default template is created automatically on
 first run.
 
-Available variables:
+Every new jot can leverage on the basic templating that run on jot creation.
+
+A template that defines the following variables will have them auto-filled wherever they
+appear in the document, both frontmatter and body:
 
 | Variable       | Example                        |
 | -------------- | ------------------------------ |
